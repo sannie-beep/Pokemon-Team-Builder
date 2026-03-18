@@ -2,8 +2,7 @@
 
 This simple web app helps you seamlessly add Pokemon to your team, view their performance at a glance and gives you actionable feedback on which pokemon types and roles can be added to improve your team
 
-
-
+![alt text](./documentation/screenshot.png)
 ## Contents
 
 1. [Overview](#overview)
