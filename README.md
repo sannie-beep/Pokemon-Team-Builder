@@ -20,9 +20,9 @@ This simple web app helps you seamlessly add Pokemon to your team, view their pe
 - **Build your team**
   - View the type of each Pokemon with its corresponding color
     *e.g. Pikachu is an electric-type (yellow) pokemon*
-  ![alt text](image-3.png)
+  ![alt text](./documentation/image-3.png)
   *e.g. Charizard is a  dual-type fire (orange) and flying (light purple) pokemon*
-  ![alt text](image-2.png)
+  ![alt text](./documentation/image-2.png)
   - Delete a Pokemon from your team by hovering over its card and clicking the `X` that appears at the right/ simply clicking the card
 - **Analyse your team**
 Team analytics are shown in the yellow section in real-time as you add and delete Pokemon. These operations are performed on the team list using attributes accessed through the `Pokemon` data type(see [Pokemon data type](#pokemon-data-type) for more info)
@@ -34,7 +34,7 @@ Team analytics are shown in the yellow section in real-time as you add and delet
     - **Role Coverage**
         - **Majority role**
             - Your team may recieve either `Attacker-heavy`, `Defender-heavy` and `Balanced` qualifications for its role coverage
-            ![alt text](image-6.png)
+            ![alt text](./documentation/image-6.png)
             - Calculated by comparing total numbers of attackers and defenders by summing counts of 
                 - **attackers** (`PokemonRole.physical`, `PokemonRole.special`) vs
                 - **defenders** (`PokemonRole.defender`)
@@ -59,7 +59,7 @@ Provides a simple **team-level** overview of strengths and weaknesses, focusing 
 * Visualise stamina (HP)
 
 ### Architecture
-![alt text](image.png)
+![alt text](./documentation/image.png)
 
 
 ## Setup instructions
@@ -173,6 +173,7 @@ This project has used https://github.com/jhordyess/react-tailwind-ts-starter.git
 #### Data types
 Using TypeScript, we are able to create data types to help parse the API resources fetched into usable data we can display.
 ##### Pokemon data type
+
 ```
 type Pokemon = {
   name: string
@@ -206,8 +207,8 @@ type PokemonTeam = {
   recommendAddRole: PokeTeamMainRole
 }
 ```
-##### PokemonRole (child data type, like enum)
+##### PokeTeamMainRole (child data type, like enum)
 ```
-type PokemonRole = 'attacker' | 'defender' | 'special-attacker' | 'special-defender'
+type PokeTeamMainRole = 'Attacker' | 'Defender' | 'Balanced'
 ```
 ####
