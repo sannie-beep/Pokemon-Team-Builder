@@ -19,10 +19,15 @@ This simple web app helps you seamlessly add Pokemon to your team, view their pe
 - **Find your Pokemon**: Search and enter the name of any ***existing*** Pokemon to add it to your team
 - **Build your team**
   - View the type of each Pokemon with its corresponding color
+
     *e.g. Pikachu is an electric-type (yellow) pokemon*
+
   ![alt text](./documentation/image-3.png)
+
   *e.g. Charizard is a  dual-type fire (orange) and flying (light purple) pokemon*
+
   ![alt text](./documentation/image-2.png)
+
   - Delete a Pokemon from your team by hovering over its card and clicking the `X` that appears at the right/ simply clicking the card
 - **Analyse your team**
 Team analytics are shown in the yellow section in real-time as you add and delete Pokemon. These operations are performed on the team list using attributes accessed through the `Pokemon` data type(see [Pokemon data type](#pokemon-data-type) for more info)
