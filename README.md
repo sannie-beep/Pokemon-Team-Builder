@@ -2,35 +2,68 @@
 
 This simple web app helps you seamlessly add Pokemon to your team, view their performance at a glance and gives you actionable feedback on which pokemon types and roles can be added to improve your team
 
+
+
 ## Contents
 
 1. [Overview](#overview)
-   - [Features](#features)
-   - [Architecture](#architecture)
+    * [Features](#features)
+    * [Architecture](#architecture)
 2. [Setup Instructions](#getting-started)
-3. [Testing Instructions](#testing)
+3. [Design decisions + data assumptions](#design-decisions--data-assumptions)
 
 ## Overview
 
 ### Features
 
-- **React**: Fast and flexible UI library for building user interfaces. (v. 19)
-- **TypeScript**: Strongly typed JavaScript for better development experience. (v. 5)
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI development. (v. 4)
-- **Vite**: Lightning-fast build tool for modern web projects. (v. 7)
-- **ESLint**: Linting for maintaining code quality. (v. 9)
-- **Prettier**: Code formatting for consistent style. (v. 3)
-- **Husky**: Git hooks for enforcing pre-push checks. (v. 9)
-- **pnpm**: Package manager for managing dependencies. (v. 10)
+- **Find your Pokemon**: Search and enter the name of any ***existing*** Pokemon to add it to your team
+- **Build your team**
+  - View the type of each Pokemon with its corresponding color
+    *e.g. Pikachu is an electric-type (yellow) pokemon*
+  ![alt text](image-3.png)
+  *e.g. Charizard is a  dual-type fire (orange) and flying (light purple) pokemon*
+  ![alt text](image-2.png)
+  - Delete a Pokemon from your team by hovering over its card and clicking the `X` that appears at the right/ simply clicking the card
+- **Analyse your team**
+Team analytics are shown in the yellow section in real-time as you add and delete Pokemon. These operations are performed on the team list using attributes accessed through the `Pokemon` data type(see [Pokemon data type](#pokemon-data-type) for more info)
+
+    - **Type Coverage**
+        - **Type distribution**: Hover over the pie chart sections to see how many Pokemon you have of that corresponding type
+        - **Strengths/Weaknesses**: Displays the types which Pokemon in your team are strong against and weak towards, respectively
+            - Calculated by aggregating all unique strengths and weaknesses of individual Pokémon (`Pokemon::strongAgainst`, `Pokemon::weakTo`) 
+    - **Role Coverage**
+        - **Majority role**
+            - Your team may recieve either `Attacker-heavy`, `Defender-heavy` and `Balanced` qualifications for its role coverage
+            ![alt text](image-6.png)
+            - Calculated by comparing total numbers of attackers and defenders by summing counts of 
+                - **attackers** (`PokemonRole.physical`, `PokemonRole.special`) vs
+                - **defenders** (`PokemonRole.defender`)
+             
+        - **Role counts**
+            - Simple dot chart visual of raw counts of `physical` and `special` attacker-role pokemon, as well as `defender` role Pokemon in your team
+    - **Recommendations**
+        - **Role recommendations**: Advice on what role of Pokemon to add 
+            - *e.g. if team is **attacker-heavy**, it recommends adding more **defensive** pokemon*
+            - *e.g. if a team is **balanced**, it will state so*
+        - **Type recommendations**: Advice on what types of Pokemon to add
+            - Recommended by taking team's `weak-against` types and 
+
+
+  
+
+#### What this app does
+Provides a simple **team-level** overview of strengths and weaknesses, focusing on balancing out your team against different Pokemon types.
+
+#### What this app does not do
+* Visualise attack power (CP)
+* Visualise stamina (HP)
 
 ### Architecture
-
 ![alt text](image.png)
 
+
 ## Setup instructions
-
 **NOTE**: The following setup instructions are taken from https://github.com/jhordyess/react-tailwind-ts-starter/blob/main/README.md, as this project was used as a template to work off. Further justifications are [below](#template-credits-and-tech-stack-justification)
-
 ### Prerequisites
 
 1. Install [Node.js](https://nodejs.org/en/download) (LTS version recommended).
@@ -45,7 +78,7 @@ npm install -g pnpm@latest-10
 1. Clone the repository:
 
 ```sh
-git clone
+git clone 
 ```
 
 2. Navigate to the project folder:
@@ -67,6 +100,7 @@ pnpm dev
 ```
 
 5. Open your browser and visit [http://localhost:5173](http://localhost:5173) to see your project.
+
 
 ### Commands
 
@@ -111,12 +145,10 @@ pnpm validate
 ```sh
 pnpm format
 ```
-
 ---
 
-## Testing
-
 ## Design decisions + data assumptions
+
 
 ### Template credits and tech stack justification
 
@@ -134,7 +166,48 @@ This project has used https://github.com/jhordyess/react-tailwind-ts-starter.git
 - **pnpm**: Efficient package manager to install and manage dependencies
 
 #### Plugins
-
 - **chartj.s** : Provides a clean, responsive pie chart utility ideal for type coverage data presentation, as chart is pleasantly animated and as more data points are added
 
 ### Design decisions
+
+#### Data types
+Using TypeScript, we are able to create data types to help parse the API resources fetched into usable data we can display.
+##### Pokemon data type
+```
+type Pokemon = {
+  name: string
+  types: string[]
+  role: PokemonRole
+  weakTo: string[]
+  strongAgainst: string[]
+}
+```
+##### PokemonRole (child data type, like enum)
+```
+type PokemonRole = 'attacker' | 'defender' | 'special-attacker' | 'special-defender'
+```
+##### PokemonTeam type
+```
+
+type PokemonTeam = {
+  pokemonList: Pokemon[]
+  length: number
+  totalAttackers: number
+  totalDefenders: number
+  totalPhysicalAttackers: number
+  totalSpecialAttackers: number
+  totalPhysicalDefenders: number
+  totalSpecialDefenders: number
+  allTeamTypes: string[]
+  allWeakAgainst: string[]
+  allStrongAgainst: string[]
+  teamMainRole: PokeTeamMainRole
+  recommendAddType: string[]
+  recommendAddRole: PokeTeamMainRole
+}
+```
+##### PokemonRole (child data type, like enum)
+```
+type PokemonRole = 'attacker' | 'defender' | 'special-attacker' | 'special-defender'
+```
+####
