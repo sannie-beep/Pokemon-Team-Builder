@@ -54,8 +54,6 @@ Team analytics are shown in the yellow section in real-time as you add and delet
             - Recommended by taking team's `weak-against` types and 
 
 
-  
-
 #### What this app does
 Provides a simple **team-level** overview of strengths and weaknesses, focusing on balancing out your team against different Pokemon types.
 
@@ -216,4 +214,7 @@ type PokemonTeam = {
 ```
 type PokeTeamMainRole = 'Attacker' | 'Defender' | 'Balanced'
 ```
-####
+#### Data assumptions
+1. All Pokemon names are valid strings matching those in the PokeApi
+2. Each Pokemon has no more than 2 types
+3. Each Pokémon has exactly one role: 'attacker', 'defender', 'special-attacker', 'special-defender'. Role is determined based on base stats (highest among Attack, Defense, Special Attack, Special Defense).
