@@ -44,7 +44,7 @@ export default function PokeTypeCoverage({ team }: Props) {
     <section>
       <h3 className="font-poppins mb-2 text-xl font-extrabold text-[#0D1D40]">Type Coverage</h3>
       {team.length === 0 && (
-        <p className="text-sm text-[#563F1A]">No Pokémon yet. Add some to see recommendations.</p>
+        <p className="text-sm text-[#563F1A]">No Pokémon yet. Add some to see type coverage.</p>
       )}
       {team.length > 0 && (
         <div>

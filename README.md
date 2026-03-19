@@ -10,12 +10,20 @@ This [simple web app](https://pokemonteambuildertool.vercel.app/) helps you seam
     * [Architecture](#architecture)
 2. [Setup Instructions](#getting-started)
 3. [Design decisions + data assumptions](#design-decisions--data-assumptions)
+    * [Credits + Tech stack justifications](#template-credits-and-tech-stack-justification)
+    * [Design decisions](#design-decisions)
+    * [Data assumptions](#data-assumptions)
 
 ## Overview
 
 ### Features
 
-- **Find your Pokemon**: Search and enter the name of any ***existing*** Pokemon to add it to your team
+- **Find your Pokemon**: 
+  - Search and enter the name of any ***existing*** Pokemon to add it to your team (stored as a [`Pokemon`](#pokemon-data-type) data type in [`PokemonTeam`](#pokemonteam-type) object in-memory)
+  - Error message is displayed if the Pokemon is not found/cannot connect to API server.
+  ![alt text](./documentation/not_found.png)
+  
+
 - **Build your team**
   - View the type of each Pokemon with its corresponding color
 
@@ -29,28 +37,30 @@ This [simple web app](https://pokemonteambuildertool.vercel.app/) helps you seam
 
   - Delete a Pokemon from your team by hovering over its card and clicking the `X` that appears at the right/ simply clicking the card
 - **Analyse your team**
-Team analytics are shown in the yellow section in real-time as you add and delete Pokemon. These operations are performed on the team list using attributes accessed through the `Pokemon` data type(see [Pokemon data type](#pokemon-data-type) for more info)
+Team analytics are shown in the right-hand-side yellow section in real-time as you add and delete Pokemon. These are calculated in the `team_hander` module upon every Pokemon add to your `PokemonTeam`.
 
     - **Type Coverage**
         - **Type distribution**: Hover over the pie chart sections to see how many Pokemon you have of that corresponding type
         - **Strengths/Weaknesses**: Displays the types which Pokemon in your team are strong against and weak towards, respectively
-            - Calculated by aggregating all unique strengths and weaknesses of individual Pokémon (`Pokemon::strongAgainst`, `Pokemon::weakTo`) 
+            - Calculated by aggregating all unique strengths and weaknesses of individual Pokémon (`Pokemon::strongAgainst`, `Pokemon::weakTo`) and storing in the team(`PokemonTeam::allStrongAgainst` and `PokemonTeam::allWeakAgainst`)
     - **Role Coverage**
         - **Majority role**
-            - Your team may recieve either `Attacker-heavy`, `Defender-heavy` and `Balanced` qualifications for its role coverage
+            - Your team may recieve either `Attacker-heavy`, `Defender-heavy` and `Balanced` qualifications for its role coverage (see [`PokeTeamMainRole`](#poketeammainrole-child-data-type-like-enum))
             ![alt text](./documentation/image-6.png)
             - Calculated by comparing total numbers of attackers and defenders by summing counts of 
-                - **attackers** (`PokemonRole.physical`, `PokemonRole.special`) vs
-                - **defenders** (`PokemonRole.defender`)
+                - **attackers** ([`PokemonRole`](#pokemonrole-child-data-type-like-enum) of `special-attacker`, `attacker`) vs
+                - **defenders** ([`PokemonRole`](#pokemonrole-child-data-type-like-enum) of `special-defender`, `defender`)
              
         - **Role counts**
-            - Simple dot chart visual of raw counts of `physical` and `special` attacker-role pokemon, as well as `defender` role Pokemon in your team
+            - Simple dot chart visual of raw counts of `attacker` and `special-attacker` role pokemon, as well as `defender` and `special-defender` role Pokemon in your team
+                            ![alt text](./documentation/role_counts.png)
+
     - **Recommendations**
         - **Role recommendations**: Advice on what role of Pokemon to add 
             - *e.g. if team is **attacker-heavy**, it recommends adding more **defensive** pokemon*
             - *e.g. if a team is **balanced**, it will state so*
         - **Type recommendations**: Advice on what types of Pokemon to add
-            - Recommended by taking team's `weak-against` types and 
+            - Recommended by iterating through the types your team is weakest against (`PokemonTeam::allWeakAgainst`) and fetching the types which are strong against those.
 
 
 #### What this app does
@@ -174,7 +184,17 @@ This project has used https://github.com/jhordyess/react-tailwind-ts-starter.git
 
 #### Data types
 Using TypeScript, we are able to create data types to help parse the API resources fetched into usable data we can display.
-##### Pokemon data type
+#### Pokemon data type
+**Parsed from**
+`[PokemonAPI URL]/pokemon/{name}`
+`[PokemonAPI URL]/type/{type_name}`
+
+**Fields**
+`name` : direct from name field of API response
+`types` : parsed names accessed directly from types fields in API response
+`role` : assigned based on strongest stat out of the [4 options](#pokemonrole-child-data-type-like-enum)
+`weakTo` : iterating through `types`, fetch each type resource and access `damage_relations.double_damage_from` (Pokemon gets most damage from these)
+`strongAgainst` : iterating through `types`, fetch each type resource and access `damage_relations.double_damage_to` (Pokemon delivers most damage to these)
 
 ```
 type Pokemon = {
@@ -185,13 +205,17 @@ type Pokemon = {
   strongAgainst: string[]
 }
 ```
-##### PokemonRole (child data type, like enum)
+#### PokemonRole (child data type, like enum)
 ```
 type PokemonRole = 'attacker' | 'defender' | 'special-attacker' | 'special-defender'
 ```
-##### PokemonTeam type
+#### PokemonTeam type
+* Info fields are aggregated from all `Pokemon` objects in its `pokemonList`
+  *  **Roles** are simply counted (each pokemon has a unique role)
+  *  **Types** are accumulated in a **set** to prevent overlap (each pokemon may have multiple types, we want general coverage)
+* Overlapping types in `allWeakAgainst` and `allStrongAgainst` are resolved by removing them from both lists (team can equally counter and be threatened by them).
+* `recommendAddType` is resolved by fetching strongest pokemon that counter team's `allWeakAgainst`
 ```
-
 type PokemonTeam = {
   pokemonList: Pokemon[]
   length: number
@@ -209,11 +233,15 @@ type PokemonTeam = {
   recommendAddRole: PokeTeamMainRole
 }
 ```
-##### PokeTeamMainRole (child data type, like enum)
+#### PokeTeamMainRole (child data type, like enum)
+Whichever role has highest count in each team/ `Balanced` if equal
 ```
 type PokeTeamMainRole = 'Attacker' | 'Defender' | 'Balanced'
 ```
-#### Data assumptions
-1. All Pokemon names are valid strings matching those in the PokeApi
-2. Each Pokemon has no more than 2 types
+### Data assumptions
+1. All Pokemon names are valid strings matching those in the PokeAPI
+2. Each Pokemon has no more than 2 types (factually true)
 3. Each Pokémon has exactly one role: 'attacker', 'defender', 'special-attacker', 'special-defender'. Role is determined based on base stats (highest among Attack, Defense, Special Attack, Special Defense).
+4. Each Pokemon Type has `damage_relations.double_damage_to` and `damage_relations.double_damage_from` fields
+
+**If any of these assumptions are not met and empty data field is parsed, corresponding fields will be remain as the initialised values [0 or empty string depending on the type (`number`/ `string`)] , ensuring data safety.**
